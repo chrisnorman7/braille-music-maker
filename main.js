@@ -1,4 +1,4 @@
-/* globals error, hotkeys */
+/* globals hotkeys */
 
 const possibleNotes = ["a", "b", "c", "d", "e", "f", "g", null]
 const possibleLengths = [8, 4, 2, 1]
@@ -31,12 +31,12 @@ updatePart()
 
 function Note(note, length) {
     if (!possibleNotes.includes(note)) {
-        throw error(`Invalid note: ${note}.`)
+        throw Error(`Invalid note: ${note}.`)
     } else if (!possibleLengths.includes(length)) {
-        throw error(`Invalid length: ${length}.`)
+        throw Error(`Invalid length: ${length}.`)
     } else {
         return {
-            note: note, length: length,
+            note: note, length: length, dotted: false,
             toString: function() {
                 let friendlyNote = null
                 if (this.note === null) {
@@ -44,7 +44,11 @@ function Note(note, length) {
                 } else {
                     friendlyNote = this.note
                 }
-                return `${lengthDescriptions[this.length]} ${friendlyNote}`
+                let dotted = ""
+                if (this.dotted) {
+                    dotted = "dotted "
+                }
+                return `${friendlyNote} ${dotted}${lengthDescriptions[this.length]}`
             }
         }
     }
@@ -68,6 +72,25 @@ function updatePosition() {
     } else {
         speak("Blank.")
     }
+    let beats = 0
+    for (let i = 0; i < position; i++) {
+        let note = part.notes[i]
+        let length = note.length
+        if (length == 1) {
+            length = 16
+        } else if (length == 2) {
+            length = 8
+        } else if (length == 4) {
+            length = 4
+        } else {
+            length = 2
+        }
+        if (note.dotted) {
+            length += (length / 2)
+        }
+        beats += length
+    }
+    document.getElementById("position").innerText = `Beat ${beats}.`
 }
 
 hotkeys("left, right", (e, handler) => {
@@ -76,8 +99,7 @@ hotkeys("left, right", (e, handler) => {
             --position
             updatePosition()
         } else {
-            part.name = prompt(`Enter a new name for the ${part.name} part`, part.name)
-            updatePart()
+            speak("Beginning of piece.")
         }
     } else {
         if (position == part.notes.length) {
@@ -115,5 +137,51 @@ hotkeys("up, down", (e, handler) => {
             part = parts[index + 1]
             updatePart()
         }
+    }
+})
+
+hotkeys("p", () => {
+    let name = prompt("Enter the name for your new part:", "Untitled Part")
+    if (name) {
+        part = Part()
+        part.name = name
+        updatePart()
+    }
+})
+
+hotkeys("shift+p", () => {
+    let name = prompt(`Enter a new name for the ${part.name} part`, part.name)
+    if (name) {
+        part.name = name
+        updatePart()
+    }
+})
+
+hotkeys("r,a,b,c,d,e,f,g", (e, handler) => {
+    let key = handler.key
+    if (key == "r") {
+        key = null
+    }
+    let note = part.notes[position]
+    if (note) {
+        note.note = key
+    } else {
+        part.notes.push(Note(key, 4))
+    }
+    updatePosition()
+})
+
+hotkeys("1, 2, 4, 8, 0", (e, handler) => {
+    let note = part.notes[position]
+    if (!note) {
+        speak("No note at this position.")
+    } else {
+        let length = parseInt(handler.key)
+        if (!length) {
+            note.dotted = !note.dotted
+        } else {
+            note.length = length
+        }
+        updatePosition()
     }
 })
