@@ -267,15 +267,19 @@ hotkeys("space", () => {
     }
 })
 
-hotkeys("return", () => {
+hotkeys("shift+return, return", (e, handler) => {
     if (!midiOn) {
         return speak("MIDI is disabled on this system.")
     }
     while (midiTimerIds.length) {
         clearInterval(midiTimerIds.pop())
     }
+    if (handler.key == "shift+return") {
+        return
+    }
     let delay = 0
-    for (let note of part.notes) {
+    for (let i = position; i < part.notes.length; i++) {
+        let note = part.notes[i]
         if (note.note) {
             midiTimerIds.push(setTimeout(() => {
                 let midiNote = note.getMidiNote()
