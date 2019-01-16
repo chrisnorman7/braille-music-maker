@@ -16,17 +16,32 @@ window.onload = () => {
             }
         }
     )
+    part = Part()
+    updatePart()
+    hotkeys.filter = () => document.activeElement.id != "braille"
+    addNote(new Note("c", 4))
+    updatePosition()
 }
 
-hotkeys.filter = () => true
-
+let part = null
 const possibleNotes = ["a", "b", "c", "d", "e", "f", "g", null]
-const midiNotes = {"c": 60, "d": 62, "e": 64, "f": 65, "g": 67, "a": 69, "b": 71}
-
 const possibleLengths = [8, 4, 2, 1]
 
 const lengthDescriptions = {
     8: "eighth note", 4: "quarter note", 2: "half note", 1: "whole note"
+}
+
+const midiNotes = {"c": 60, "d": 62, "e": 64, "f": 65, "g": 67, "a": 69, "b": 71}
+
+const brailleNotes = {
+    null: {8: "x", 4: "v", 2: "u", 1: "m"},
+    "c": {8: "d", 4: "?", 2: "n", 1: "y"},
+    "d": {8: "e", 4: ":", 2: "o", 1: "z"},
+    "e": {8: "f", 4: "$", 2: "p", 1: "&"},
+    "f": {8: "g", 4: "]", 2: "q", 1: "="},
+    "g": {8: "h", 4: "|", 2: "r", 1: "("},
+    "a": {8: "i", 4: "[", 2: "s", 1: "!"},
+    "b": {8: "j", 4: "w", 2: "t", 1: ")"},
 }
 
 const status = document.getElementById("status")
@@ -49,10 +64,8 @@ function updatePart() {
     updatePosition()
     updateLength()
     speak(part.name)
+    updateBraille()
 }
-
-let part = Part()
-updatePart()
 
 class Note {
 
@@ -82,6 +95,10 @@ class Note {
         return `${friendlyNote} ${dotted}${lengthDescriptions[this.length]}`
     }
 
+    toBraille() {
+        return brailleNotes[this.note][this.length]
+    }
+
     getLength() {
         let length = this.length
         if (length == 1) {
@@ -107,10 +124,8 @@ class Note {
 function addNote(note) {
     part.notes.push(note)
     updateLength()
+    updateBraille()
 }
-
-addNote(new Note("c", 4))
-updatePosition()
 
 function speak(text) {
     document.getElementById("output").innerText = text
@@ -156,6 +171,26 @@ function updateLength() {
     }
     length = convertLength(length)
     document.getElementById("length").innerText = `Bars: ${length.bars}, beats: ${length.beats}, 16ths: ${length.sixteenths}.`
+}
+
+function updateBraille() {
+    let braille = ""
+    let bars = 0
+    let position = 0
+    for (let note of part.notes) {
+        braille += note.toBraille()
+        position += note.getLength()
+        if (!(position % 16)) {
+            bars += 1
+            if (bars == 4) {
+                bars = 1
+                braille += "\n"
+            } else {
+                braille += " "
+            }
+        }
+    }
+    document.getElementById("braille").value = braille.trim()
 }
 
 hotkeys("left, right", (e, handler) => {
