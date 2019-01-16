@@ -96,7 +96,7 @@ class Note {
     }
 
     toBraille() {
-        return brailleNotes[this.note][this.length]
+        return `${brailleNotes[this.note][this.length]}${this.dotted ? "'" : ""}`
     }
 
     getLength() {
