@@ -1,5 +1,7 @@
 /* globals hotkeys, MIDI */
 
+const midiNoteLength = 0.2
+const midiTimerIds = []
 let midiFail = false
 let midiOn = false
 
@@ -96,6 +98,10 @@ class Note {
         }
         return length
     }
+
+    getMidiNote() {
+        return midiNotes[this.note]
+    }
 }
 
 function addNote(note) {
@@ -124,9 +130,9 @@ function updatePosition() {
     if (note) {
         speak(note.toString())
         if (midiOn) {
-            let midiNote = midiNotes[note.note]
+            let midiNote = note.getMidiNote()
             MIDI.noteOn(0, midiNote, 127, 0)
-            MIDI.noteOff(0, midiNote, 1)
+            MIDI.noteOff(0, midiNote, midiNoteLength * note.getLength())
         }
     } else {
         speak("Blank.")
@@ -258,5 +264,25 @@ hotkeys("space", () => {
             }
         }
         speak(`Midi ${midiOn ? "on" : "off"}.`)
+    }
+})
+
+hotkeys("return", () => {
+    if (!midiOn) {
+        return speak("MIDI is disabled on this system.")
+    }
+    while (midiTimerIds.length) {
+        clearInterval(midiTimerIds.pop())
+    }
+    let delay = 0
+    for (let note of part.notes) {
+        if (note.note) {
+            midiTimerIds.push(setTimeout(() => {
+                let midiNote = note.getMidiNote()
+                MIDI.noteOn(0, midiNote, 127)
+                MIDI.noteOff(0, midiNote, note.getLength() * midiNoteLength)
+            }, delay))
+        }
+        delay += (note.getLength() * midiNoteLength * 1000)
     }
 })
