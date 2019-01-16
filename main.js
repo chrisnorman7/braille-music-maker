@@ -40,3 +40,10 @@ function addNote(note) {
 }
 
 addNote(Note("c", 4))
+
+document.onkeydown = (e) => {
+    let key = e.key
+    if (key == "control") {
+        window.speechSynthesis.cancel()
+    }
+}
