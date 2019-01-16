@@ -193,7 +193,18 @@ function updateBraille() {
     document.getElementById("braille").value = braille.trim()
 }
 
-hotkeys("left, right", (e, handler) => {
+function hotkey(key, func, description) {
+    let dt = document.createElement("dt")
+    dt.innerText = key
+    let dd = document.createElement("dd")
+    dd.innerText = description
+    for (let element of [dt, dd]) {
+        document.getElementById("hotkeys").appendChild(element)
+    }
+    hotkeys(key, func)
+}
+
+hotkey("left, right", (e, handler) => {
     if (handler.key == "left") {
         if (position) {
             --position
@@ -209,9 +220,9 @@ hotkeys("left, right", (e, handler) => {
             updatePosition()
         }
     }
-})
+}, "Move through the list of notes.")
 
-hotkeys("home, end", (event, handler) => {
+hotkey("home, end", (event, handler) => {
     if (handler.key == "home") {
         position = 0
         speak("Beginning of piece.")
@@ -219,9 +230,9 @@ hotkeys("home, end", (event, handler) => {
         position = part.notes.length
         speak("End of piece.")
     }
-})
+}, "Move to the start or end of the list of notes.")
 
-hotkeys("up, down", (e, handler) => {
+hotkey("up, down", (e, handler) => {
     let index = parts.indexOf(part)
     if (handler.key == "up") {
         if (index) {
@@ -238,26 +249,26 @@ hotkeys("up, down", (e, handler) => {
             updatePart()
         }
     }
-})
+}, "Move through parts.")
 
-hotkeys("p", () => {
+hotkey("p", () => {
     let name = prompt("Enter the name for your new part:", "Untitled Part")
     if (name) {
         part = Part()
         part.name = name
         updatePart()
     }
-})
+}, "Create a new part.")
 
-hotkeys("shift+p", () => {
+hotkey("shift+p", () => {
     let name = prompt(`Enter a new name for the ${part.name} part`, part.name)
     if (name) {
         part.name = name
         updatePart()
     }
-})
+}, "Rename the current part.")
 
-hotkeys("r, a, b, c, d, e, f, g", (e, handler) => {
+hotkey("r, a, b, c, d, e, f, g", (e, handler) => {
     let key = handler.key
     if (key == "r") {
         key = null
@@ -270,9 +281,9 @@ hotkeys("r, a, b, c, d, e, f, g", (e, handler) => {
     }
     updatePosition()
     updateBraille()
-})
+}, "Set the current note. Set a rest with the r key.")
 
-hotkeys("1, 2, 4, 8, 0", (e, handler) => {
+hotkey("1, 2, 4, 8, 0", (e, handler) => {
     let note = part.notes[position]
     if (!note) {
         speak("No note at this position.")
@@ -287,9 +298,9 @@ hotkeys("1, 2, 4, 8, 0", (e, handler) => {
         updateLength()
         updateBraille()
     }
-})
+}, "Set the duration of the current note. To set whether or not the note should be dotted, press 0.")
 
-hotkeys("space", () => {
+hotkey("space", () => {
     if (midiFail) {
         speak("MIDI will not work on this system.")
         midiOn = false
@@ -302,9 +313,9 @@ hotkeys("space", () => {
         }
         speak(`Midi ${midiOn ? "on" : "off"}.`)
     }
-})
+}, "Enable or disable MIDI.")
 
-hotkeys("shift+return, return", (e, handler) => {
+hotkey("shift+return, return", (e, handler) => {
     if (!midiOn) {
         return speak("MIDI is disabled on this system.")
     }
@@ -326,4 +337,4 @@ hotkeys("shift+return, return", (e, handler) => {
         }
         delay += (note.getLength() * midiNoteLength * 1000)
     }
-})
+}, "With return, start playing the current part from your current position. Add shift to stop the currently-playing part.")
