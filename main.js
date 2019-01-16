@@ -1,5 +1,7 @@
 /* globals hotkeys */
 
+hotkeys.filter = () => true
+
 const possibleNotes = ["a", "b", "c", "d", "e", "f", "g", null]
 const possibleLengths = [8, 4, 2, 1]
 
@@ -23,45 +25,79 @@ const parts = []
 function updatePart() {
     // Show the current part.
     document.getElementById("part").innerText = part.name
+    position = 0
+    updatePosition()
+    updateLength()
     speak(part.name)
 }
 
 let part = Part()
 updatePart()
 
-function Note(note, length) {
-    if (!possibleNotes.includes(note)) {
-        throw Error(`Invalid note: ${note}.`)
-    } else if (!possibleLengths.includes(length)) {
-        throw Error(`Invalid length: ${length}.`)
-    } else {
-        return {
-            note: note, length: length, dotted: false,
-            toString: function() {
-                let friendlyNote = null
-                if (this.note === null) {
-                    friendlyNote = "rest"
-                } else {
-                    friendlyNote = this.note
-                }
-                let dotted = ""
-                if (this.dotted) {
-                    dotted = "dotted "
-                }
-                return `${friendlyNote} ${dotted}${lengthDescriptions[this.length]}`
-            }
+class Note {
+
+    constructor(note, length, dotted) {
+        if (!possibleNotes.includes(note)) {
+            throw Error(`Invalid note: ${note}.`)
+        } else if (!possibleLengths.includes(length)) {
+            throw Error(`Invalid length: ${length}.`)
+        } else {
+            this.note = note
+            this.length = length
+            this.dotted = !!dotted
         }
+    }
+
+    toString() {
+        let friendlyNote = null
+        if (this.note === null) {
+            friendlyNote = "rest"
+        } else {
+            friendlyNote = this.note
+        }
+        let dotted = ""
+        if (this.dotted) {
+            dotted = "dotted "
+        }
+        return `${friendlyNote} ${dotted}${lengthDescriptions[this.length]}`
+    }
+
+    getLength() {
+        let length = this.length
+        if (length == 1) {
+            length = 16
+        } else if (length == 2) {
+            length = 8
+        } else if (length == 4) {
+            length = 4
+        } else {
+            length = 2
+        }
+        if (this.dotted) {
+            length += (length / 2)
+        }
+        return length
     }
 }
 
 function addNote(note) {
     part.notes.push(note)
+    updateLength()
 }
 
-addNote(Note("c", 4))
+addNote(new Note("c", 4))
+updatePosition()
 
 function speak(text) {
     document.getElementById("output").innerText = text
+}
+
+function convertLength(length) {
+    let bars = parseInt(length / 16)
+    let remainder = length % 16
+    let beats = parseInt(remainder / 4)
+    remainder %= 4
+    return {bars: bars, beats: beats, sixteenths: remainder}
 }
 
 function updatePosition() {
@@ -75,22 +111,22 @@ function updatePosition() {
     let beats = 0
     for (let i = 0; i < position; i++) {
         let note = part.notes[i]
-        let length = note.length
-        if (length == 1) {
-            length = 16
-        } else if (length == 2) {
-            length = 8
-        } else if (length == 4) {
-            length = 4
-        } else {
-            length = 2
-        }
-        if (note.dotted) {
-            length += (length / 2)
-        }
-        beats += length
+        beats += note.getLength()
     }
-    document.getElementById("position").innerText = `Beat ${beats}.`
+    if (beats) {
+        beats += 1
+    }
+    let length = convertLength(beats)
+    document.getElementById("position").innerText = `Bar ${length.bars}, beat ${length.beats}, position ${length.sixteenths}.`
+}
+
+function updateLength() {
+    let length = 0
+    for (let note of part.notes) {
+        length += note.getLength()
+    }
+    length = convertLength(length)
+    document.getElementById("length").innerText = `Bars: ${length.bars}, beats: ${length.beats}, 16ths: ${length.sixteenths}.`
 }
 
 hotkeys("left, right", (e, handler) => {
@@ -157,7 +193,7 @@ hotkeys("shift+p", () => {
     }
 })
 
-hotkeys("r,a,b,c,d,e,f,g", (e, handler) => {
+hotkeys("r, a, b, c, d, e, f, g", (e, handler) => {
     let key = handler.key
     if (key == "r") {
         key = null
@@ -166,7 +202,7 @@ hotkeys("r,a,b,c,d,e,f,g", (e, handler) => {
     if (note) {
         note.note = key
     } else {
-        part.notes.push(Note(key, 4))
+        addNote(new Note(key, 4))
     }
     updatePosition()
 })
@@ -183,5 +219,6 @@ hotkeys("1, 2, 4, 8, 0", (e, handler) => {
             note.length = length
         }
         updatePosition()
+        updateLength()
     }
 })
