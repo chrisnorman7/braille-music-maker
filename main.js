@@ -18,7 +18,7 @@ window.onload = () => {
     )
     part = Part()
     updatePart()
-    hotkeys.filter = () => document.activeElement.id != "braille"
+    hotkeys.filter = () => document.activeElement !== braille
     addNote(new Note("c", 4))
     updatePosition()
 }
@@ -44,8 +44,18 @@ const brailleNotes = {
     "b": {8: "j", 4: "w", 2: "t", 1: ")"},
 }
 
+const braille = document.getElementById("braille")
 const status = document.getElementById("status")
 status.innerText = "Braille Music Maker"
+
+document.getElementById("copy").onclick = () => {
+    braille.select()
+    if (document.execCommand("copy")) {
+        speak("Braille copied.")
+    } else {
+        speak("Failed to copy braille.")
+    }
+}
 
 let position = 0
 
@@ -174,23 +184,23 @@ function updateLength() {
 }
 
 function updateBraille() {
-    let braille = ""
+    let text = ""
     let bars = 0
     let position = 0
     for (let note of part.notes) {
-        braille += note.toBraille()
+        text += note.toBraille()
         position += note.getLength()
         if (!(position % 16)) {
             bars += 1
             if (bars == 4) {
                 bars = 1
-                braille += "\n"
+                text += "\n"
             } else {
-                braille += " "
+                text += " "
             }
         }
     }
-    document.getElementById("braille").value = braille.trim()
+    braille.value = text.trim()
 }
 
 function hotkey(key, func, description) {
