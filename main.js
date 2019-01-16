@@ -1,10 +1,17 @@
 /* globals hotkeys, MIDI */
 
+let midiFail = false
+let midiOn = false
+
 window.onload = () => {
     MIDI.loadPlugin(
         {
             soundfontUrl: "midi.js/examples/soundfont/",
-            onerror: () => alert("Failed to initialise MIDI. You will not be able to play back musical notes.")
+            onsuccess: () => midiOn = true,
+            onerror: () => {
+                midiFail = true
+                alert("Failed to initialise MIDI. You will not be able to play back musical notes.")
+            }
         }
     )
 }
@@ -12,6 +19,8 @@ window.onload = () => {
 hotkeys.filter = () => true
 
 const possibleNotes = ["a", "b", "c", "d", "e", "f", "g", null]
+const midiNotes = {"c": 60, "d": 62, "e": 64, "f": 65, "g": 67, "a": 69, "b": 71}
+
 const possibleLengths = [8, 4, 2, 1]
 
 const lengthDescriptions = {
@@ -114,6 +123,11 @@ function updatePosition() {
     let note = part.notes[position]
     if (note) {
         speak(note.toString())
+        if (midiOn) {
+            let midiNote = midiNotes[note.note]
+            MIDI.noteOn(0, midiNote, 127, 0)
+            MIDI.noteOff(0, midiNote, 1)
+        }
     } else {
         speak("Blank.")
     }
@@ -229,5 +243,20 @@ hotkeys("1, 2, 4, 8, 0", (e, handler) => {
         }
         updatePosition()
         updateLength()
+    }
+})
+
+hotkeys("space", () => {
+    if (midiFail) {
+        speak("MIDI will not work on this system.")
+        midiOn = false
+    } else {
+        midiOn = !midiOn
+        if (!midiOn) {
+            for (let i = 1; i < 300; i++) {
+                MIDI.noteOff(0, i)
+            }
+        }
+        speak(`Midi ${midiOn ? "on" : "off"}.`)
     }
 })
