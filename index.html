@@ -4,7 +4,9 @@
         <title>Braille Music Maker</title>
     </head>
     <body>
-        <h1 aria-live="polite" aria-atomic="false" id="status">Loading</h1>
+        <h1 aria-live="assertive" aria-atomic="false" id="status">Loading</h1>
+        <h2>Part</h2>
+        <p id="part">No part yet.</p>
         <h2>Position</h2>
         <p id="position">No position yet.</p>
         <h2>Length</h2>
@@ -12,22 +14,8 @@
         <h2>Braille Music</h2>
         <p><textarea id="braille"></textarea></p>
         <p><input type="button" id="copy"</p>
-        <details>
-            <summary>Speech Options</summary>
-            <ul role="menu">
-                <li role="menuitem">
-                    <label>Enable Speech <input type="checkbox" id="voice-enable" value="Speak"></label>
-                </li>
-                <li role="menuitem">
-                    <label>Rate <input type="number" id="voice-rate" min="1.0" max="10" value="1">
-                    </label>
-                </li>
-                <li role="menuitem">
-                    <label>Voice <select id="voice-voice"></select>
-                    </label>
-                </li>
-            </ul>
-        </details>
+        <p aria-live="polite" aria-atomic="false" id="output">No message yet.</p>
+        <script src="https://unpkg.com/hotkeys-js/dist/hotkeys.min.js"></script>
         <script src="main.js"></script>
     </body>
 </html>

@@ -1,24 +1,33 @@
-/* globals error */
+/* globals error, hotkeys */
 
 const possibleNotes = ["a", "b", "c", "d", "e", "f", "g", null]
 const possibleLengths = [8, 4, 2, 1]
-
-// TTS stuff.
-const tts = window.speechSynthesis
-const voiceVoice = document.getElementById("voice-voice")
-const voiceEnable = document.getElementById("voice-enable")
-const voiceRate = document.getElementById("voice-rate")
 
 const lengthDescriptions = {
     8: "eighth note", 4: "quarter note", 2: "half note", 1: "whole note"
 }
 
-const notes = []
-
 const status = document.getElementById("status")
 status.innerText = "Braille Music Maker"
 
 let position = 0
+
+function Part() {
+    let p = {name: "Untitled part", notes: []}
+    parts.push(p)
+    return p
+}
+
+const parts = []
+
+function updatePart() {
+    // Show the current part.
+    document.getElementById("part").innerText = part.name
+    speak(part.name)
+}
+
+let part = Part()
+updatePart()
 
 function Note(note, length) {
     if (!possibleNotes.includes(note)) {
@@ -42,52 +51,69 @@ function Note(note, length) {
 }
 
 function addNote(note) {
-    notes.push(note)
+    part.notes.push(note)
 }
 
 addNote(Note("c", 4))
 
 function speak(text) {
-    if (voiceEnable.checked) {
-        window.speechSynthesis.cancel()
-        let msg = new SpeechSynthesisUtterance(text)
-        msg.rate = parseInt(voiceRate.value)
-        let voice_index = parseInt(voiceVoice.value)
-        if (voice_index != -1) {
-            msg.voice = tts.getVoices()[voice_index]
-        }
-        tts.speak(msg)
-    }
+    document.getElementById("output").innerText = text
 }
 
-document.onkeydown = (e) => {
-    let key = e.key
-    if (key == "control") {
-        window.speechSynthesis.cancel()
+function updatePosition() {
+    // Position has been set. Now speak the note at the new position.
+    let note = part.notes[position]
+    if (note) {
+        speak(note.toString())
     } else {
-        speak(key)
+        speak("Blank.")
     }
 }
 
-
-function clearElement(e) {
-    // Below code based on the first answer at:
-    // https://stackoverflow.com/questions/3955229/remove-all-child-elements-of-a-dom-node-in-javascript
-    while (e.firstChild) {
-        e.removeChild(e.firstChild)
+hotkeys("left, right", (e, handler) => {
+    if (handler.key == "left") {
+        if (position) {
+            --position
+            updatePosition()
+        } else {
+            part.name = prompt(`Enter a new name for the ${part.name} part`, part.name)
+            updatePart()
+        }
+    } else {
+        if (position == part.notes.length) {
+            speak("End of piece.")
+        } else {
+            ++position
+            updatePosition()
+        }
     }
-}
+})
 
-clearElement(voiceVoice)
-let o = document.createElement("option")
-o.value = -1
-o.selected = true
-o.innerText = "Default"
-voiceVoice.appendChild(o)
-for (let i in tts.getVoices()) {
-    let voice = tts.getVoices()[i]
-    let o = document.createElement("option")
-    o.value = i
-    o.innerText = `${voice.name} (${voice.lang})`
-    voiceVoice.appendChild(o)
-}
+hotkeys("home, end", (event, handler) => {
+    if (handler.key == "home") {
+        position = 0
+        speak("Beginning of piece.")
+    } else {
+        position = part.notes.length
+        speak("End of piece.")
+    }
+})
+
+hotkeys("up, down", (e, handler) => {
+    let index = parts.indexOf(part)
+    if (handler.key == "up") {
+        if (index) {
+            part = parts[index - 1]
+            updatePart()
+        } else {
+            speak("No previous part.")
+        }
+    } else {
+        if (index == (parts.length - 1)) {
+            speak("No next part.")
+        } else {
+            part = parts[index + 1]
+            updatePart()
+        }
+    }
+})
