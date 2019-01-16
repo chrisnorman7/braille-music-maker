@@ -1,4 +1,10 @@
-/* globals hotkeys */
+/* globals hotkeys, MIDI */
+
+window.onload = () => {
+    MIDI.loadPlugin(
+        {soundfontUrl: "midi.js/examples/soundfont/"}
+    )
+}
 
 hotkeys.filter = () => true
 
