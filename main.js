@@ -2,7 +2,10 @@
 
 window.onload = () => {
     MIDI.loadPlugin(
-        {soundfontUrl: "midi.js/examples/soundfont/"}
+        {
+            soundfontUrl: "midi.js/examples/soundfont/",
+            onerror: () => alert("Failed to initialise MIDI. You will not be able to play back musical notes.")
+        }
     )
 }
 
