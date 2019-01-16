@@ -1,4 +1,4 @@
-/* globals hotkeys, MIDI */
+/* globals hotkeys, MIDI, Cookies */
 
 const midiNoteLength = 0.2
 const midiTimerIds = []
@@ -16,11 +16,24 @@ window.onload = () => {
             }
         }
     )
-    part = Part()
-    updatePart()
     hotkeys.filter = () => document.activeElement !== braille
-    addNote(new Note("c", 4))
-    updatePosition()
+    let data = Cookies.get("piece")
+    if (data) {
+        parts.length = 0
+        data = JSON.parse(data)
+        for (let partDump of data) {
+            part = Part()
+            part.name = partDump.name
+            for (let noteDump of partDump.notes) {
+                addNote(new Note(noteDump.note, noteDump.length, noteDump.dotted))
+            }
+        }
+    } else {
+        part = Part()
+        updatePart()
+        addNote(new Note("c", 4))
+        updatePosition()
+    }
 }
 
 let part = null
@@ -183,6 +196,10 @@ function updateLength() {
     document.getElementById("length").innerText = `Bars: ${length.bars}, beats: ${length.beats}, 16ths: ${length.sixteenths}.`
 }
 
+function updateCooky() {
+    Cookies.set("piece", JSON.stringify(parts), {days: 30})
+}
+
 function updateBraille() {
     let text = ""
     let bars = 0
@@ -201,6 +218,7 @@ function updateBraille() {
         }
     }
     braille.value = text.trim()
+    updateCooky()
 }
 
 function hotkey(key, func, description) {
