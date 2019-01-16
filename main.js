@@ -269,6 +269,7 @@ hotkeys("r, a, b, c, d, e, f, g", (e, handler) => {
         addNote(new Note(key, 4))
     }
     updatePosition()
+    updateBraille()
 })
 
 hotkeys("1, 2, 4, 8, 0", (e, handler) => {
@@ -284,6 +285,7 @@ hotkeys("1, 2, 4, 8, 0", (e, handler) => {
         }
         updatePosition()
         updateLength()
+        updateBraille()
     }
 })
 
