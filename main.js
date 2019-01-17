@@ -198,7 +198,7 @@ function updateLength() {
 }
 
 function updateCooky() {
-    Cookies.set("piece", JSON.stringify(parts), {days: 30})
+    Cookies.set("piece", JSON.stringify(parts), {expires: 30})
 }
 
 function braillePart(p) {
