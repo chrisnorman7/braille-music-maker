@@ -272,6 +272,7 @@ hotkey("home, end", (event, handler) => {
         position = part.notes.length
         speak("End of piece.")
     }
+    updatePosition()
 }, "Move to the start or end of the list of notes.")
 
 hotkey("up, down", (e, handler) => {
