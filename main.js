@@ -379,7 +379,11 @@ hotkey("shift+return, return", (e, handler) => {
 }, "With return, start playing the current part from your current position. Add shift to stop the currently-playing part.")
 
 hotkey("control+return", () => {
+    if (!midiOn) {
+        return speak("MIDI is disabled on this system.")
+    }
     stopMidi()
+    speak("Playing parts.")
     for (let p of parts) {
         playPart(p)
     }
