@@ -343,6 +343,24 @@ hotkey("space", () => {
     }
 }, "Enable or disable MIDI.")
 
+function playPart(p, start) {
+    if (start === undefined) {
+        start = position
+    }
+    let delay = 0
+    for (let i = start; i < p.notes.length; i++) {
+        let note = p.notes[i]
+        if (note.note) {
+            midiTimerIds.push(setTimeout(() => {
+                let midiNote = note.getMidiNote()
+                MIDI.noteOn(0, midiNote, 127)
+                MIDI.noteOff(0, midiNote, note.getLength() * midiNoteLength)
+            }, delay))
+        }
+        delay += (note.getLength() * midiNoteLength * 1000)
+    }
+}
+
 hotkey("shift+return, return", (e, handler) => {
     if (!midiOn) {
         return speak("MIDI is disabled on this system.")
@@ -353,16 +371,5 @@ hotkey("shift+return, return", (e, handler) => {
     if (handler.key == "shift+return") {
         return
     }
-    let delay = 0
-    for (let i = position; i < part.notes.length; i++) {
-        let note = part.notes[i]
-        if (note.note) {
-            midiTimerIds.push(setTimeout(() => {
-                let midiNote = note.getMidiNote()
-                MIDI.noteOn(0, midiNote, 127)
-                MIDI.noteOff(0, midiNote, note.getLength() * midiNoteLength)
-            }, delay))
-        }
-        delay += (note.getLength() * midiNoteLength * 1000)
-    }
+    playPart(part)
 }, "With return, start playing the current part from your current position. Add shift to stop the currently-playing part.")
