@@ -387,3 +387,14 @@ hotkey("control+return", () => {
         playPart(p)
     }
 }, "Play all parts at the same time from the current position.")
+
+hotkey("backspace", () => {
+    if (!position) {
+        speak("No previous note.")
+    } else {
+        let note = part.notes[position - 1]
+        part.notes.splice(position - 1, 1)
+        speak(`Deleted ${note.toString()}.`)
+        position--
+    }
+}, "Delete the previous note.")
