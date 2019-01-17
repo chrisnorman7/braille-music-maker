@@ -296,6 +296,14 @@ hotkey("shift+p", () => {
     }
 }, "Rename the current part.")
 
+hotkey("i", () => {
+    if (position == part.notes.length) {
+        speak("You are at the end of the part.")
+    } else {
+        part.notes.splice(position, 0, new Note("c", 4))
+    }
+}, "Insert a note at the current position.")
+
 hotkey("r, a, b, c, d, e, f, g", (e, handler) => {
     let key = handler.key
     if (key == "r") {
