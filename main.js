@@ -200,11 +200,11 @@ function updateCooky() {
     Cookies.set("piece", JSON.stringify(parts), {days: 30})
 }
 
-function updateBraille() {
+function braillePart(p) {
     let text = ""
     let bars = 0
     let position = 0
-    for (let note of part.notes) {
+    for (let note of p.notes) {
         text += note.toBraille()
         position += note.getLength()
         if (!(position % 16)) {
@@ -217,7 +217,11 @@ function updateBraille() {
             }
         }
     }
-    braille.value = text.trim()
+    return text
+}
+
+function updateBraille() {
+    braille.value = braillePart(part).trim()
     updateCooky()
 }
 
@@ -230,6 +234,16 @@ function hotkey(key, func, description) {
         document.getElementById("hotkeys").appendChild(element)
     }
     hotkeys(key, func)
+}
+
+document.getElementById("generate").onclick = () => {
+    let text = ""
+    for (let p of parts) {
+        text += `${p.name}\r\n${braillePart(p)}\r\n\r\n`
+    }
+    let score = document.getElementById("score")
+    score.value = text
+    score.focus()
 }
 
 hotkey("left, right", (e, handler) => {
