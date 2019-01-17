@@ -383,7 +383,6 @@ hotkey("control+return", () => {
         return speak("MIDI is disabled on this system.")
     }
     stopMidi()
-    speak("Playing parts.")
     for (let p of parts) {
         playPart(p)
     }
