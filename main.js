@@ -412,3 +412,14 @@ hotkey("backspace", () => {
         updateLength()
     }
 }, "Delete the previous note.")
+
+hotkey("delete", () => {
+    if (parts.length == 1) {
+        speak("You cannot delete the only part.")
+    } else if (confirm(`Are you sure you want to delete the ${part.name} part?`)) {
+        let index = parts.indexOf(part)
+        parts.splice(index, 1)
+        part = parts[Math.max(0, index - 1)]
+        updatePart()
+    }
+}, "Delete the current part.")
