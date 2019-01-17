@@ -301,6 +301,9 @@ hotkey("i", () => {
         speak("You are at the end of the part.")
     } else {
         part.notes.splice(position, 0, new Note("c", 4))
+        updatePosition()
+        updateBraille()
+        updateLength()
     }
 }, "Insert a note at the current position.")
 
@@ -404,5 +407,8 @@ hotkey("backspace", () => {
         part.notes.splice(position - 1, 1)
         speak(`Deleted ${note.toString()}.`)
         position--
+        updatePosition()
+        updateBraille()
+        updateLength()
     }
 }, "Delete the previous note.")
