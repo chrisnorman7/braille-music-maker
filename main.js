@@ -16,7 +16,7 @@ window.onload = () => {
             }
         }
     )
-    hotkeys.filter = () => document.activeElement !== braille
+    hotkeys.filter = () => ![braille, score].includes(document.activeElement)
     let data = Cookies.get("piece")
     if (data) {
         parts.length = 0
@@ -57,6 +57,7 @@ const brailleNotes = {
     "b": {8: "j", 4: "w", 2: "t", 1: ")"},
 }
 
+const score = document.getElementById("score")
 const braille = document.getElementById("braille")
 const status = document.getElementById("status")
 status.innerText = "Braille Music Maker"
@@ -241,7 +242,6 @@ document.getElementById("generate").onclick = () => {
     for (let p of parts) {
         text += `${p.name}\r\n${braillePart(p)}\r\n\r\n`
     }
-    let score = document.getElementById("score")
     score.value = text
     score.focus()
 }
