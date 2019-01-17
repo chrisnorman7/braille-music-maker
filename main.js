@@ -361,15 +361,26 @@ function playPart(p, start) {
     }
 }
 
+function stopMidi() {
+    while (midiTimerIds.length) {
+        clearInterval(midiTimerIds.pop())
+    }
+}
+
 hotkey("shift+return, return", (e, handler) => {
     if (!midiOn) {
         return speak("MIDI is disabled on this system.")
     }
-    while (midiTimerIds.length) {
-        clearInterval(midiTimerIds.pop())
-    }
+    stopMidi()
     if (handler.key == "shift+return") {
         return
     }
     playPart(part)
 }, "With return, start playing the current part from your current position. Add shift to stop the currently-playing part.")
+
+hotkey("control+return", () => {
+    stopMidi()
+    for (let p of parts) {
+        playPart(p)
+    }
+}, "Play all parts at the same time from the current position.")
