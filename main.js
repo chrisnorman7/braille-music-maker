@@ -8,7 +8,7 @@ let midiOn = false
 window.onload = () => {
     MIDI.loadPlugin(
         {
-            soundfontUrl: "http://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/",
+            soundfontUrl: "https://gleitz.github.io/midi-js-soundfonts/FluidR3_GM/",
             onsuccess: () => midiOn = true,
             onerror: () => {
                 midiFail = true
